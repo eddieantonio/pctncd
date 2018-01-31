@@ -1,3 +1,12 @@
-.tox/
+# Python bytecode and caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Distribution
 *.egg-info
+
+# Testing
+.tox/
 .pytest_cache/
+.hypothesis/
