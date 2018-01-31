@@ -4,3 +4,5 @@
 from pctncd import encode, decode
 
 
+def test_identity():
+    ...
