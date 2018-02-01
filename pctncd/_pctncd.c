@@ -71,37 +71,35 @@ static PyObject *
 pctncd_decode(PyObject *self, PyObject *args)
 {
     PyObject *result = NULL;
-    char *dest;
     const char *original;
-    const char *src;
-    size_t original_len;
+    size_t capacity;
 
     // "s" format actually encodes as UTF-8, which is fine!
     // It also raises a ValueError when there's an embedded NUL. Nice!
     if (!PyArg_ParseTuple(args, "s", &original))
         return NULL;
 
-    original_len = strlen(original) + 1;
+    capacity = strlen(original) + 1;
 
-    /* Create an output array that we will slow populate,
+    /* Create an output array that we will slowly populate;
      * if the string does not contain any '%', its length will be
-     * original_len. */
-    char *output = malloc(original_len);
+     * capacity. */
+    char *output = malloc(capacity);
     if (output == NULL) {
         return NULL;
     }
 
-    /* FROM THIS POINT ON, it's okay to goto error; */
+    /* FROM THIS POINT ON, it's okay to goto finalize; */
 
     /* Start copying bytes one-by-one. */
-    src = original;
-    dest = output;
+    const char * restrict src = original;
+    char * restrict dest = output;
     while (*src != '\0') {
         if (*src == '%') {
+            /* Percent found! The next two bytes should be hex digits. */
             if (from_hex(src + 1, dest) == false) {
                 /* XXX: raise a ValueError. */
                 goto finalize;
-            } else {
             }
             src += 3; /* Skip the %XX */
             dest++;
