@@ -17,7 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from string import ascii_letters, digits
+from urllib.parse import quote
+from string import ascii_letters, digits, printable
 
 import pytest
 from hypothesis import given
@@ -33,10 +34,16 @@ def test_callable():
     assert decode("") is ""
 
 
-@pytest.mark.skip
 @given(text(alphabet=ascii_alphanumerics))
 def test_identity_for_alphanumerics(s):
+    "Alphanumerics should be returned verbatim."
     assert s == decode(s)
+
+
+@given(text(alphabet=printable))
+def test_ascii_printable(s):
+    "ASCII printables should be quoted."
+    assert s == decode(quote(s))
 
 
 def test_simple():
