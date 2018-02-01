@@ -108,7 +108,8 @@ pctncd_decode(PyObject *self, PyObject *args)
         if (original[srcidx] == '%') {
             /* Percent found! The next two bytes should be hex digits. */
             // TODO: ensure there are at least three characters at srcidx
-            if (from_hex(&original[srcidx + 1], dest) == false) {
+            if ((srcidx + 2 >= capacity) ||
+                (from_hex(&original[srcidx + 1], dest) == false)) {
                 PyErr_SetString(PyExc_ValueError, "invalid hex escape");
                 goto finalize;
             }
