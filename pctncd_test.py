@@ -39,6 +39,12 @@ def test_identity_for_alphanumerics(s):
     assert s == decode(s)
 
 
+def test_simple():
+    "Tests a single percent-escape."
+    s = "hello%20world"
+    assert "hello world" == decode(s)
+
+
 # TODO: make sure I throw in some null characters
 
 
