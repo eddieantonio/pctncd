@@ -46,10 +46,11 @@ def test_ascii_printable(s):
     assert s == decode(quote(s))
 
 
-def test_simple():
-    "Tests a single percent-escape."
-    s = "hello%20world"
-    assert "hello world" == decode(s)
+def test_mismatched():
+    "Tests an invaldid percent escape."
+    s = "hello%2gworld"
+    with pytest.raises(ValueError):
+        decode(s)
 
 
 # TODO: make sure I throw in some null characters
