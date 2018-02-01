@@ -26,19 +26,13 @@ static PyObject *
 pctncd_decode(PyObject *self, PyObject *args)
 {
     const char *buffer;
-    PyObject *result;
 
     // "s" format actually encodes as UTF-8, which is fine!
     // It also raises a value error when there's an embedded NUL. Nice!
     if (!PyArg_ParseTuple(args, "s", &buffer))
         return NULL;
 
-    result = PyUnicode_DecodeUTF8(buffer, strlen(buffer), NULL);
-    if (result == NULL)
-        return NULL;
-
-    Py_DECREF(result);
-    return result;
+    return PyUnicode_DecodeUTF8(buffer, strlen(buffer), NULL);
 }
 
 
