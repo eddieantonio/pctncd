@@ -107,10 +107,10 @@ pctncd_decode(PyObject *self, PyObject *args)
     for (size_t srcidx = 0; original[srcidx] != '\0'; /* manual */) {
         if (original[srcidx] == '%') {
             /* Percent found! The next two bytes should be hex digits. */
-            // TODO: ensure there are at least three characters at srcidx
             if ((srcidx + 2 >= capacity) ||
                 (from_hex(&original[srcidx + 1], dest) == false)) {
-                PyErr_SetString(PyExc_ValueError, "invalid hex escape");
+                PyErr_Format(PyExc_ValueError,
+                        "invalid percent-encoded triplet at index %u", srcidx);
                 goto finalize;
             }
             srcidx += 3; /* Skip the %XX */
