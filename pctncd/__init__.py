@@ -16,10 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from _pctncd import decode
 
-def encode():
-    raise NotImplementedError
-
-
-def decode(s):
-    return s
+__version__ = '0.1.0'

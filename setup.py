@@ -4,8 +4,8 @@
 from setuptools import setup, Extension, find_packages
 
 
-c_ext = Extension('_pctncd',
-                  sources=['_pctncd.c'])
+c_ext = Extension('pctncd._pctncd',
+                  sources=['pctncd/_pctncd.c'])
 
 
 setup(
