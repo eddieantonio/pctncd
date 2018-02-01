@@ -46,7 +46,7 @@ static PyMethodDef PctncdMethods[] = {
 
 static struct PyModuleDef pctncd_module = {
     PyModuleDef_HEAD_INIT,
-    "pctncd",           /* name of module */
+    "_pctncd",          /* name of module */
     module_doctring,    /* module documentation */
     -1,                 /* size of per-interpret state of the module, or -1 if
                            the module keeps state in global variables... */
@@ -55,7 +55,7 @@ static struct PyModuleDef pctncd_module = {
 
 
 PyMODINIT_FUNC
-PyInit_pctncd(void)
+PyInit__pctncd(void)
 {
     return PyModule_Create(&pctncd_module);
 }
