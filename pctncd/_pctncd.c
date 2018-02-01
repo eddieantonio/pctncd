@@ -99,6 +99,7 @@ pctncd_decode(PyObject *self, PyObject *args)
             /* Percent found! The next two bytes should be hex digits. */
             if (from_hex(src + 1, dest) == false) {
                 /* XXX: raise a ValueError. */
+                PyErr_SetString(PyExc_ValueError, "invalid hex escape");
                 goto finalize;
             }
             src += 3; /* Skip the %XX */
