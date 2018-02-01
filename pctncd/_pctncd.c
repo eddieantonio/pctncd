@@ -86,7 +86,11 @@ pctncd_decode(PyObject *self, PyObject *args)
     // assumption: original is a zero-terminated string.
     capacity = strlen(original);
 
-    // TODO: avoid making 0-length allocations!
+    // Got an empty string? Return an empty string!
+    // Avoids a zero-length allocation later.
+    if (capacity == 0) {
+        return PyUnicode_FromString("");       
+    }
 
     /* Create an output array that we will slowly populate;
      * if the string does not contain any '%', its length will be
