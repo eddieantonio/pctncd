@@ -16,7 +16,9 @@
  */
 
 #include <Python.h>
+
 #include <stdbool.h>
+#include <assert.h>
 
 
 /* Error value when the decoded character is not a nibble! */
@@ -71,47 +73,54 @@ static PyObject *
 pctncd_decode(PyObject *self, PyObject *args)
 {
     PyObject *result = NULL;
-    const char *original;
-    size_t capacity;
+    const char * restrict original;
+    char * restrict dest;
+    size_t decoded_size, capacity;
 
     // "s" format actually encodes as UTF-8, which is fine!
     // It also raises a ValueError when there's an embedded NUL. Nice!
     if (!PyArg_ParseTuple(args, "s", &original))
         return NULL;
+    // TODO: use s# format?
 
-    capacity = strlen(original) + 1;
+    // assumption: original is a zero-terminated string.
+    capacity = strlen(original);
+
+    // TODO: avoid making 0-length allocations!
 
     /* Create an output array that we will slowly populate;
      * if the string does not contain any '%', its length will be
      * capacity. */
     char *output = malloc(capacity);
     if (output == NULL) {
+        // XXX: Shouldn't I throw a memory error here?
         return NULL;
     }
 
     /* FROM THIS POINT ON, it's okay to goto finalize; */
 
     /* Start copying bytes one-by-one. */
-    const char * restrict src = original;
-    char * restrict dest = output;
-    while (*src != '\0') {
-        if (*src == '%') {
+    dest = output;
+    decoded_size = 0;
+    for (size_t srcidx = 0; original[srcidx] != '\0'; /* manual */) {
+        if (original[srcidx] == '%') {
             /* Percent found! The next two bytes should be hex digits. */
-            if (from_hex(src + 1, dest) == false) {
-                /* XXX: raise a ValueError. */
+            // TODO: ensure there are at least three characters at srcidx
+            if (from_hex(&original[srcidx + 1], dest) == false) {
                 PyErr_SetString(PyExc_ValueError, "invalid hex escape");
                 goto finalize;
             }
-            src += 3; /* Skip the %XX */
+            srcidx += 3; /* Skip the %XX */
             dest++;
         } else {
             /* Copy that byte over! */
-            *dest++ = *src++;
+            *dest++ = original[srcidx++];
         }
+        decoded_size++;
     }
-    *dest = '\0';
+    assert(decoded_size <= capacity);
 
-    result = PyUnicode_DecodeUTF8(output, strlen(output), NULL);
+    result = PyUnicode_DecodeUTF8(output, decoded_size, NULL);
 
 finalize:
     free(output);
