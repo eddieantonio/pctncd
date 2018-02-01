@@ -89,17 +89,15 @@ pctncd_decode(PyObject *self, PyObject *args)
     // Got an empty string? Return an empty string!
     // Avoids a zero-length allocation later.
     if (capacity == 0) {
-        return PyUnicode_FromString("");       
+        return PyUnicode_FromString("");
     }
 
     /* Create an output array that we will slowly populate;
      * if the string does not contain any '%', its length will be
      * capacity. */
-    char *output = malloc(capacity);
-    if (output == NULL) {
-        // XXX: Shouldn't I throw a memory error here?
-        return NULL;
-    }
+    char *output = PyMem_Malloc(capacity);
+    if (output == NULL)
+        return PyErr_NoMemory();
 
     /* FROM THIS POINT ON, it's okay to goto finalize; */
 
@@ -127,7 +125,7 @@ pctncd_decode(PyObject *self, PyObject *args)
     result = PyUnicode_DecodeUTF8(output, decoded_size, NULL);
 
 finalize:
-    free(output);
+    PyMem_Free(output);
     return result;
 }
 
