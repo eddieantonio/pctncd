@@ -29,11 +29,6 @@ from pctncd import decode
 ascii_alphanumerics = ascii_letters + digits
 
 
-def test_callable():
-    "Sanity test. Most likely covered by other tests."
-    assert decode("") is ""
-
-
 @given(text(alphabet=ascii_alphanumerics))
 def test_identity_for_alphanumerics(s):
     "Alphanumerics should be returned verbatim."
@@ -42,15 +37,20 @@ def test_identity_for_alphanumerics(s):
 
 @given(text(alphabet=printable))
 def test_ascii_printable(s):
-    "ASCII printables should be quoted."
+    "Some printable ASCII characters should be quoted."
     assert s == decode(quote(s))
 
 
-def test_mismatched():
-    "Tests an invaldid percent escape."
+def test_bad_pct_escape():
+    "Tests an invalid percent escape."
     s = "hello%2gworld"
     with pytest.raises(ValueError):
         decode(s)
+
+
+def test_decode_nul():
+    "Test decoding the ␀ character."
+    assert "\x00" == decode("%00")
 
 
 # TODO: make sure I throw in some null characters
