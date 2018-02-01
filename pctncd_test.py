@@ -29,7 +29,8 @@ ascii_alphanumerics = ascii_letters + digits
 
 
 def test_callable():
-    assert decode("") is None
+    "Sanity test. Most likely covered by other tests."
+    assert decode("") is ""
 
 
 @pytest.mark.skip
