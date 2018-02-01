@@ -72,3 +72,11 @@ def test_overlong_forms():
 
     with pytest.raises(UnicodeDecodeError):
         decode("%F0%80%80%80")
+
+
+@given(text())
+def test_value_error_end_of_string(unquoted):
+    s = quote(unquoted)
+    bad_string = s + "%"
+    with pytest.raises(ValueError) as exc_info:
+        decode(bad_string)
