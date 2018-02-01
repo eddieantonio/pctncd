@@ -53,7 +53,10 @@ def test_decode_nul():
     assert "\x00" == decode("%00")
 
 
-# TODO: make sure I throw in some null characters
+@given(text())
+def test_full_unicode_range(s):
+    "Some printable ASCII characters should be quoted."
+    assert s == decode(quote(s))
 
 
 # TODO: make sure I throw in some overlong forms.
