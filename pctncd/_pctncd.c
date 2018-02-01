@@ -16,23 +16,89 @@
  */
 
 #include <Python.h>
+#include <stdbool.h>
+
+
+/* Error value when the decoded character is not a nibble! */
+#define INVALID_NIBBLE 0xF0
 
 static char module_doctring[] =
     "percent-decoding, done the lame way.";
 static char decode_doctring[] =
     "decode a percent-encoded string.";
 
+static uint8_t decode_nibble(const char c) {
+    switch (c) {
+        case '0': return 0;
+        case '2': return 2;
+        default: return INVALID_NIBBLE;
+    }
+}
+
+/* Decode two hexadecimal digits to one byte, placing the result in dest.
+ * Returns false if the digits are not hexadecimal. */
+static bool from_hex(const char * restrict src, char * restrict dest) {
+    uint8_t upper = 0x00, lower = 0x00;
+    if ((upper = decode_nibble(src[0])) != INVALID_NIBBLE) {
+        if ((lower = decode_nibble(src[1])) != INVALID_NIBBLE) {
+            *dest = upper << 4 | lower;
+            return true;
+        }
+    }
+    return false;
+}
+
+
 static PyObject *
 pctncd_decode(PyObject *self, PyObject *args)
 {
-    const char *buffer;
+    PyObject *result = NULL;
+    char *dest;
+    const char *original;
+    const char *src;
+    size_t original_len;
 
     // "s" format actually encodes as UTF-8, which is fine!
-    // It also raises a value error when there's an embedded NUL. Nice!
-    if (!PyArg_ParseTuple(args, "s", &buffer))
+    // It also raises a ValueError when there's an embedded NUL. Nice!
+    if (!PyArg_ParseTuple(args, "s", &original))
         return NULL;
 
-    return PyUnicode_DecodeUTF8(buffer, strlen(buffer), NULL);
+    original_len = strlen(original) + 1;
+
+    /* Create an output array that we will slow populate,
+     * if the string does not contain any '%', its length will be
+     * original_len. */
+    char *output = malloc(original_len);
+    if (output == NULL) {
+        return NULL;
+    }
+
+    /* FROM THIS POINT ON, it's okay to goto error; */
+
+    /* Start copying bytes one-by-one. */
+    src = original;
+    dest = output;
+    while (*src != '\0') {
+        if (*src == '%') {
+            if (from_hex(src + 1, dest) == false) {
+                /* XXX: raise a ValueError. */
+                goto finalize;
+            } else {
+            }
+            src += 3; /* Skip the %XX */
+            dest++;
+        } else {
+            /* Copy that byte over! */
+            *dest++ = *src++;
+        }
+    }
+    *dest = '\0';
+
+    result = PyUnicode_DecodeUTF8(output, strlen(output), NULL);
+
+finalize:
+    free(output);
+    return result;
 }
 
 
