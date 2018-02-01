@@ -59,4 +59,16 @@ def test_full_unicode_range(s):
     assert s == decode(quote(s))
 
 
-# TODO: make sure I throw in some overlong forms.
+def test_overlong_forms():
+    """
+    Test UTF-8 overlong forms. An easy way to sneak in ␀ when you're not
+    expecting it, so we should throw a decoding error.
+    """
+    with pytest.raises(UnicodeDecodeError):
+        decode("%C0%80")
+
+    with pytest.raises(UnicodeDecodeError):
+        decode("%E0%80%80")
+
+    with pytest.raises(UnicodeDecodeError):
+        decode("%F0%80%80%80")
