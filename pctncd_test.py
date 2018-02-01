@@ -76,7 +76,15 @@ def test_overlong_forms():
 
 @given(text())
 def test_value_error_end_of_string(unquoted):
+    """
+    Test that we get errors for invalid hex escapes at the end of the string.
+    """
     s = quote(unquoted)
     bad_string = s + "%"
+
     with pytest.raises(ValueError) as exc_info:
         decode(bad_string)
+
+    # Expect a message with the index of the error in it.
+    expected = "invalid percent-encoded triplet at index {:d}".format(len(s))
+    assert expected == str(exc_info.value)
